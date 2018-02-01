@@ -1,65 +1,46 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan 26 17:38:37 2018
-This is our SAM_to_BED.py @improved by Andreas
+Created on Thursday Feb 01 2018 11:22
+Exercise: write script to convert BAM into BED using Pysam,
+starting from sam2bed script we wrote (@improved by Andreas)
 
-Define a function main that contains the code and is run at the end.
-Introduce log file properly. I think it's gone append that file each time
-we run the script => keep trace of all runs in 1 file.
 
 @author: group, edited by Andreas
 """
 
 import logging as L
 import sys
+import pysam
 
 
 def main():
 
     L.basicConfig(filename='mylogfile.log', level=L.DEBUG)
 
-    file = sys.stdin
-    output = sys.stdout
+    bamfile = pysam.AlignmentFile("BEL033_1000.bam", "rb")
+    outf = open("BEL033_1000_v2.bed", 'w')
 
-    chrom = ''
-    start = 0
-    end = 0
-    ID = ''
-    Score = ''
-    Strand = '+'
-    TotalCount = 0
-    PairsCount = 0
-    RawPairedReads = 0
-    SumIntervals = 0
+    pair_count = 0
+    sum_intervals = 0
 
-    for line in file:
-        if line.startswith('@'):
-            pass
-        else:
-            name = line.split('\t')
-            TotalCount += 1
-            if name[6] == '=':
-                RawPairedReads += 1
-                if int(name[8]) > 0:
-                    # take only the reads in on the positive strand
-                    PairsCount += 1
-                    chrom = name[2]
-                    start = int(name[3])
-                    end = int(start)+int(name[8])
-                    ID = name[0]
-                    Score = name[4]
-                    output.write(chrom + '\t' + str(start) + '\t' + str(end)
-                        + '\t' + ID + '\t' + Score + '\t' + Strand + '\n')
-                    SumIntervals += int(name[8])
+    initial_count = bamfile.count()
 
-    AvgIntervals = SumIntervals/PairsCount
+    for aln in bamfile.fetch():
+        if aln.is_paired and aln.is_read1:
+            pair_count += 1
+            fgt_end = str(aln.reference_start+aln.template_length)
+            sum_intervals += aln.template_length
+            outf.write(aln.reference_name + '\t' + str(aln.reference_start)
+                       + '\t' + fgt_end + '\t' + aln.query_name + '\t.\t.\n')
 
-    L.info('The number of initial number of reads in the input file is:\t'
-           + str(TotalCount))
-    L.info('The number of paired-end reads is:\t'+str(PairsCount))
-    L.info('The number of raw paired reads is:\t'+str(RawPairedReads))
-    L.info('The average interval length is:\t'+str(AvgIntervals))
+    bamfile.close()
+    outf.close()
+
+    av_fgt_size = sum_intervals / pair_count
+    L.info("Initial count is {}".format(initial_count))
+    L.info("Number of paired reads is {}".format(pair_count))
+    L.info("Average fragment size is {:4.2f}".format(av_fgt_size))
 
 
 if __name__ == "__main__":
