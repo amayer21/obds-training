@@ -6,3 +6,14 @@ then went back to master, staged it and committed it there and
 it then disapeared from AM_test branch...
 
 Kind of make sense but surprised me :-)
+
+
+_______________
+
+Now that I have push everything to GitHub, made a pull request, resolve conflicts between 
+branch and master (both had modified README) and merdge them, this file (which was only in 
+master) appeared in the branch too... so I've had to pull both master and branch again to 
+my local repository...
+
+Now I'm gone make a few changes to this file, commit each of them, then try to come back to 
+this version without deleting the history...
