@@ -1,2 +1,2 @@
 # obds-training
-scripts for cgat exercises
+scripts for cgat exercises 
