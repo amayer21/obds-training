@@ -17,3 +17,6 @@ my local repository...
 
 Now I'm gone make a few changes to this file, commit each of them, then try to come back to 
 this version without deleting the history...
+
+
+change 1
