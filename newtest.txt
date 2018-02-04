@@ -1,1 +1,6 @@
 test
+
+This time I created this file in AM_test branch and committed before to move back to master.
+It therefore exist only in the branch.
+I've then push it to the branch on GitHub without merging with master.
+
