@@ -1,0 +1,8 @@
+test test test
+
+Created in branch AM_test without commiting => appeared also  in master
+so I went back to branch to modify it, again without staging and committing
+then went back to master, staged it and committed it there and
+it then disapeared from AM_test branch...
+
+Kind of make sense but surprised me :-)
