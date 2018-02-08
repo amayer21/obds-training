@@ -5,17 +5,20 @@ Created on Wed Feb  7 14:00:34 2018
 @author: amayer
 
 Exercise: pipeline process fastq file from CRISPR screen to generate read count
-This is our first pipeline, so to keep it easy we use the trim function from Bowtie
-Therefore we can process only the file with a specific stagger (GFP-1)
-(To process all files, we'll need to use a regular expression to extract sgRNA instead)
+This is our first pipeline, so to keep it easy we use the trim function from 
+Bowtie. Therefore we can process only the file with a specific stagger (GFP-1)
+(To process all files, we'll need to use a regular expression to extract 
+sgRNA instead)
 
-Library file had to be indexed before to start ($ bowtie-build FASTA_GeckoV2_HGLib_B.fasta geckob)
+Library file had to be indexed before to start 
+(from command line: $ bowtie-build FASTA_GeckoV2_HGLib_B.fasta geckob)
 
 - bowtie: trim 5' and 3' end and align it to GecKOv2A library
 - the result of bowtie is piped to samtools command to convert into BAM file
-- BAM file is sorted (may want to pipe that to previous command to avoid keeping intermediate files
+- BAM file is sorted (may want to pipe that to previous command to avoid 
+                      keeping intermediate files
 - sorted BAM file is indexed
-- statistics are extracted from BAM file into tsv file 
+- statistics are extracted from BAM file into tsv file
 
 """
 import sys
@@ -32,20 +35,26 @@ PARAMS = P.getParameters(
 # ---------------------------------------------------
 # Specific pipeline tasks
 
-# trim 5' and 3' end of reads to keep only the sgRNA sequence, 
+
+# trim 5' and 3' end of reads to keep only the sgRNA sequence,
 # then map reads to indexed library, then convert sam file into bam file
-# also generate a .error file for the alignement 
+# also generate a .error file for the alignement
 @transform("*.fastq.gz",
            suffix(".fastq.gz"),
            ".bam")
 def run_bowtie(infile, outfile):
-
-    statement = '''bowtie --trim5 27 --trim3 27 --sam geckob %(infile)s
-                    2> %(infile)s.error | samtools view -b > %(outfile)s '''
+    job_threads = PARAMS['bowtie_threads']
+    bowtie_options = PARAMS['bowtie_options']
+    bowtie_index = PARAMS['bowtie_index']
+    samtools_vie = PARAMS['samtools_view']
+    statement = '''/usr/bin/time -o bowtie.time -v bowtie %(bowtie_options)s
+                    %(bowtie_index)s %(infile)s
+                    2> %(infile)s.error
+                    | samtools view %(samtools_view)s > %(outfile)s '''
 
     P.run()
 
-    
+
 # Sort the BAM file (could have been piped to previous command)
 @transform(run_bowtie,
            suffix(".bam"),
@@ -66,6 +75,7 @@ def index_bam(infile, outfile):
     statement = '''samtools index %(infile)s > %(outfile)s '''
 
     P.run()
+
 
 # follows: wait for the index file to be created before to run next command
 # then compute statistics about the bam file and export them to tsv file
