@@ -46,7 +46,7 @@ def run_bowtie(infile, outfile):
     job_threads = PARAMS['bowtie_threads']
     bowtie_options = PARAMS['bowtie_options']
     bowtie_index = PARAMS['bowtie_index']
-    samtools_vie = PARAMS['samtools_view']
+    samtools_view = PARAMS['samtools_view']
     statement = '''/usr/bin/time -o bowtie.time -v bowtie %(bowtie_options)s
                     %(bowtie_index)s %(infile)s
                     2> %(infile)s.error
